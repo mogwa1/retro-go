@@ -40,17 +40,28 @@ static inline uint32_t gamepad_read(void)
 
 #if RG_GAMEPAD_DRIVER == 1    // GPIO
 
+/*
+#ifdef RG_GPIO_GAMEPAD_X
     int joyX = adc1_get_raw(RG_GPIO_GAMEPAD_X);
-    int joyY = adc1_get_raw(RG_GPIO_GAMEPAD_Y);
-
     if (joyY > 2048 + 1024) state |= RG_KEY_UP;
     else if (joyY > 1024)   state |= RG_KEY_DOWN;
+
+    int joyY = adc1_get_raw(RG_GPIO_GAMEPAD_Y);
     if (joyX > 2048 + 1024) state |= RG_KEY_LEFT;
     else if (joyX > 1024)   state |= RG_KEY_RIGHT;
+#endif
+*/
+    
+//#ifdef RG_GPIO_GAMEPAD_UP
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_UP))     state |= RG_KEY_UP;
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_DOWN))   state |= RG_KEY_DOWN;
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_LEFT))   state |= RG_KEY_LEFT;
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_RIGHT))  state |= RG_KEY_RIGHT;
+//#endif
 
-    if (!gpio_get_level(RG_GPIO_GAMEPAD_MENU))   state |= RG_KEY_MENU;
-    if (!gpio_get_level(RG_GPIO_GAMEPAD_OPTION)) state |= RG_KEY_OPTION;
-    if (!gpio_get_level(RG_GPIO_GAMEPAD_SELECT)) state |= RG_KEY_SELECT;
+    //if (!gpio_get_level(RG_GPIO_GAMEPAD_MENU))   state |= RG_KEY_MENU;
+    //if (!gpio_get_level(RG_GPIO_GAMEPAD_OPTION)) state |= RG_KEY_OPTION;
+    //if (!gpio_get_level(RG_GPIO_GAMEPAD_SELECT)) state |= RG_KEY_SELECT;
     if (!gpio_get_level(RG_GPIO_GAMEPAD_START))  state |= RG_KEY_START;
     if (!gpio_get_level(RG_GPIO_GAMEPAD_A))      state |= RG_KEY_A;
     if (!gpio_get_level(RG_GPIO_GAMEPAD_B))      state |= RG_KEY_B;
@@ -161,18 +172,33 @@ void rg_input_init(void)
 
     const char *driver = "GPIO";
 
+/*
+#ifdef RG_GPIO_GAMEPAD_X
     adc1_config_width(ADC_WIDTH_MAX - 1);
     adc1_config_channel_atten(RG_GPIO_GAMEPAD_X, ADC_ATTEN_11db);
     adc1_config_channel_atten(RG_GPIO_GAMEPAD_Y, ADC_ATTEN_11db);
+#endif
+*/
+
+//#ifdef RG_GPIO_GAMEPAD_UP
+    gpio_set_direction(RG_GPIO_GAMEPAD_UP, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_UP, GPIO_PULLUP_ONLY);
+    gpio_set_direction(RG_GPIO_GAMEPAD_DOWN, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_DOWN, GPIO_PULLUP_ONLY);
+    gpio_set_direction(RG_GPIO_GAMEPAD_LEFT, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_LEFT, GPIO_PULLUP_ONLY);
+    gpio_set_direction(RG_GPIO_GAMEPAD_RIGHT, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_RIGHT, GPIO_PULLUP_ONLY);
+//#endif
 
     gpio_set_direction(RG_GPIO_GAMEPAD_MENU, GPIO_MODE_INPUT);
     gpio_set_pull_mode(RG_GPIO_GAMEPAD_MENU, GPIO_PULLUP_ONLY);
     gpio_set_direction(RG_GPIO_GAMEPAD_OPTION, GPIO_MODE_INPUT);
-    // gpio_set_pull_mode(RG_GPIO_GAMEPAD_OPTION, GPIO_PULLUP_ONLY);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_OPTION, GPIO_PULLUP_ONLY);
     gpio_set_direction(RG_GPIO_GAMEPAD_SELECT, GPIO_MODE_INPUT);
     gpio_set_pull_mode(RG_GPIO_GAMEPAD_SELECT, GPIO_PULLUP_ONLY);
     gpio_set_direction(RG_GPIO_GAMEPAD_START, GPIO_MODE_INPUT);
-    // gpio_set_pull_mode(RG_GPIO_GAMEPAD_START, GPIO_PULLUP_ONLY);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_START, GPIO_PULLUP_ONLY);
     gpio_set_direction(RG_GPIO_GAMEPAD_A, GPIO_MODE_INPUT);
     gpio_set_pull_mode(RG_GPIO_GAMEPAD_A, GPIO_PULLUP_ONLY);
     gpio_set_direction(RG_GPIO_GAMEPAD_B, GPIO_MODE_INPUT);
@@ -239,7 +265,7 @@ void rg_input_init(void)
 
 #endif
 
-#if defined(RG_BATTERY_ADC_CHANNEL) || (RG_GAMEPAD_DRIVER == 1)
+#if defined(RG_BATTERY_ADC_CHANNEL) || ((RG_GAMEPAD_DRIVER == 1) && (RG_GPIO_GAMEPAD_X))
     adc1_config_width(ADC_WIDTH_MAX - 1);
     adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_11db);
     esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_11db, ADC_WIDTH_MAX - 1, 1100, &adc_chars);

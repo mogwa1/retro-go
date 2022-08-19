@@ -248,6 +248,7 @@ static void lcd_init(void)
     ILI9341_CMD(0x01, {});     // Reset
     ILI9341_CMD(0x3A, {0x55}); // Pixel Format Set RGB565
     ILI9341_CMD(0x36, {(0x00|0x00|0x00)});
+    ILI9341_CMD(0x21, {0x80});                                  // invert colors
     ILI9341_CMD(0xB1, {0x00, 0x10});                            // Frame Rate Control (1B=70, 1F=61, 10=119)
     ILI9341_CMD(0xB2, {0x0c, 0x0c, 0x00, 0x33, 0x33});
     ILI9341_CMD(0xB7, {0x35});
