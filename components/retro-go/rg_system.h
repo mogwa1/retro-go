@@ -17,7 +17,9 @@ extern "C" {
 #elif defined(RG_TARGET_QTPY_GAMER)
     #include "targets/qtpy-gamer.h"
 #elif defined(RG_TARGET_RETRO_ESP32)
-    #include "targets/retro-esp32.h"            
+    #include "targets/retro-esp32.h"
+#elif defined(RG_TARGET_FRI3D_BADGE)
+    #include "targets/fri3d-badge.h"
 #else
     #warning "No target defined. Defaulting to ODROID-GO."
     #include "targets/odroid-go.h"

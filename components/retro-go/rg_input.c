@@ -97,6 +97,20 @@ static inline uint32_t gamepad_read(void)
 
     battery_level = 99;
 
+#elif RG_GAMEPAD_DRIVER == 5  // GPIO Fri3d badge
+
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_UP))     state |= RG_KEY_UP;
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_DOWN))   state |= RG_KEY_DOWN;
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_LEFT))   state |= RG_KEY_LEFT;
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_RIGHT))  state |= RG_KEY_RIGHT;
+
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_MENU))   state |= RG_KEY_MENU;
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_OPTION)) state |= RG_KEY_OPTION;
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_SELECT)) state |= RG_KEY_SELECT;
+    if (gpio_get_level(RG_GPIO_GAMEPAD_START))   state |= RG_KEY_START;
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_A))      state |= RG_KEY_A;
+    if (!gpio_get_level(RG_GPIO_GAMEPAD_B))      state |= RG_KEY_B;
+
 #endif
 
     // Virtual buttons (combos) to replace essential missing buttons.
@@ -233,6 +247,31 @@ void rg_input_init(void)
     aw_digitalWrite(AW_TFT_RESET, 1);
     vTaskDelay(pdMS_TO_TICKS(10));
 
+#elif RG_GAMEPAD_DRIVER == 5  // GPIO Fri3d badge
+
+    const char *driver = "GPIO-FRI3D";
+
+    gpio_set_direction(RG_GPIO_GAMEPAD_UP, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_UP, GPIO_PULLUP_ONLY);
+    gpio_set_direction(RG_GPIO_GAMEPAD_DOWN, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_DOWN, GPIO_PULLUP_ONLY);
+    gpio_set_direction(RG_GPIO_GAMEPAD_LEFT, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_LEFT, GPIO_PULLUP_ONLY);
+    gpio_set_direction(RG_GPIO_GAMEPAD_RIGHT, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_RIGHT, GPIO_PULLUP_ONLY);
+
+    gpio_set_direction(RG_GPIO_GAMEPAD_MENU, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_MENU, GPIO_PULLUP_ONLY);
+    gpio_set_direction(RG_GPIO_GAMEPAD_OPTION, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_OPTION, GPIO_PULLUP_ONLY);
+    gpio_set_direction(RG_GPIO_GAMEPAD_SELECT, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_SELECT, GPIO_PULLUP_ONLY);
+    gpio_set_direction(RG_GPIO_GAMEPAD_START, GPIO_MODE_INPUT);
+    // gpio_set_pull_mode(RG_GPIO_GAMEPAD_START, GPIO_PULLUP_ONLY);
+    gpio_set_direction(RG_GPIO_GAMEPAD_A, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_A, GPIO_PULLUP_ONLY);
+    gpio_set_direction(RG_GPIO_GAMEPAD_B, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(RG_GPIO_GAMEPAD_B, GPIO_PULLUP_ONLY);
 #else
 
     #error "No gamepad driver selected"
