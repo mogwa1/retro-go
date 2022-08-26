@@ -77,6 +77,12 @@ void rg_audio_init(int sampleRate)
         .dma_buf_count = 4, // Goal is to have ~800 samples over 2-8 buffers (3x270 or 5x180 are pretty good)
         .dma_buf_len = 180, // The unit is stereo samples (4 bytes) (optimize for 533 usage)
         .use_apll = true, // External DAC may care about accuracy
+        .tx_desc_auto_clear = true, // Silence on underflow
+        .fixed_mclk = 0, // Unused
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
+        .mclk_multiple = I2S_MCLK_MULTIPLE_DEFAULT, // Unused
+        .bits_per_chan = I2S_BITS_PER_CHAN_DEFAULT // Use bits per sample
+#endif
     };
     esp_err_t ret = ESP_FAIL;
 
