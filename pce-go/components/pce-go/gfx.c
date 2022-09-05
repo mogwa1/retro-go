@@ -150,7 +150,7 @@ draw_sprite(uint8_t *P, uint16_t *C, int height, uint32_t attr)
 
 	for (int i = 0; i < height; i++, C += inc, P += XBUF_WIDTH) {
 
-		uint16_t J = C[0] | C[16] | C[32] | C[48];
+		uint32_t J = C[0] | C[16] | C[32] | C[48];
 		uint32_t L1, L2, L, M;
 
 		if (!J)
@@ -456,9 +456,9 @@ gfx_run(void)
 
 	/* Test raster hit */
 	if (RasHitON) {
-		int temp_rcr = IO_VDC_REG[RCR].W;
-		if (temp_rcr >= 0x40 && temp_rcr <= 0x146) {
-			if (scanline == (temp_rcr - 0x40 + IO_VDC_MINLINE) % 263) {
+		if (IO_VDC_REG[RCR].W >= 0x40 && (IO_VDC_REG[RCR].W <= 0x146)) {
+			uint16_t temp_rcr = (uint16_t)(IO_VDC_REG[RCR].W - 0x40);
+			if (scanline == (temp_rcr + IO_VDC_MINLINE) % 263) {
 				TRACE_GFX("\n-----------------RASTER HIT (%d)------------------\n", scanline);
 				gfx_irq(VDC_STAT_RR);
 			}
