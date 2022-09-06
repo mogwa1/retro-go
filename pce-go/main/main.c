@@ -70,8 +70,8 @@ uint8_t *osd_gfx_framebuffer(int width, int height)
     {
         MESSAGE_INFO("Resolution changed to: %dx%d\n", width, height);
 
-        // We center the content vertically and horizontally to allow overflows all around
-        int offset_center = (((XBUF_HEIGHT - height) / 2 + 16) * XBUF_WIDTH + (XBUF_WIDTH - width) / 2);
+        // PCE-GO needs 16 lines of scratch space and then we center horizontally
+        int offset_center = (16 * XBUF_WIDTH) + (XBUF_WIDTH - width) / 2;
 
         updates[0].buffer = framebuffers[0] + offset_center;
         updates[1].buffer = framebuffers[1] + offset_center;
@@ -222,8 +222,8 @@ void app_main(void)
 
     app = rg_system_init(AUDIO_SAMPLE_RATE, &handlers, options);
 
-    framebuffers[0] = rg_alloc(XBUF_WIDTH * XBUF_HEIGHT + 2048, MEM_FAST);
-    framebuffers[1] = rg_alloc(XBUF_WIDTH * XBUF_HEIGHT + 2048, MEM_FAST);
+    framebuffers[0] = rg_alloc(XBUF_WIDTH * XBUF_HEIGHT, MEM_FAST);
+    framebuffers[1] = rg_alloc(XBUF_WIDTH * XBUF_HEIGHT, MEM_FAST);
 
     overscan = rg_settings_get_number(NS_APP, SETTING_OVERSCAN, 1);
     downsample = rg_settings_get_number(NS_APP, SETTING_AUDIOTYPE, 0);

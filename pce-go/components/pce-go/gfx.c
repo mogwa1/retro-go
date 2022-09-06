@@ -48,6 +48,7 @@ static struct {
 	int latched;
 } gfx_context;
 
+static uint8_t *framebuffer_top, *framebuffer_bottom;
 
 /*
 	Draw background tiles between two lines
@@ -103,6 +104,14 @@ draw_tiles(uint8_t *screen_buffer, int Y1, int Y2, int scroll_x, int scroll_y)
 				if (!J)
 					continue;
 
+				if (P + 8 >= framebuffer_bottom) {
+					printf("tile overflow!\n");
+					break;
+				} else if (P < framebuffer_top) {
+					printf("tile underflow!\n");
+					continue;
+				}
+
 				M = C[0];
 				L = ((M & 0x88) >> 3) | ((M & 0x44) << 6) | ((M & 0x22) << 15) | ((M & 0x11) << 24);
 				M = C[1];
@@ -148,6 +157,12 @@ draw_sprite(uint8_t *P, uint16_t *C, int height, uint32_t attr)
 		C = C + height - 1;
 	}
 
+	// This needs to be handled in draw_sprites() below...
+	if (height < 0) {
+		MESSAGE_DEBUG("negative sprite height!\n");
+		return;
+	}
+
 	for (int i = 0; i < height; i++, C += inc, P += XBUF_WIDTH) {
 
 		uint32_t J = C[0] | C[16] | C[32] | C[48];
@@ -155,6 +170,15 @@ draw_sprite(uint8_t *P, uint16_t *C, int height, uint32_t attr)
 
 		if (!J)
 			continue;
+
+		// This will also need to be handled in draw_sprites... (it could adjust simply constrain the height)
+		if (P + 16 >= framebuffer_bottom) {
+			printf("sprite overflow %d!\n", i);
+			break;
+		} else if (P < framebuffer_top) {
+			printf("sprite underflow %d!\n", i);
+			continue;
+		}
 
 		M = C[0];
 		L1 = ((M & 0x88) >> 3) | ((M & 0x44) << 6) | ((M & 0x22) << 15) | ((M & 0x11) << 24);
@@ -267,6 +291,13 @@ draw_sprites(uint8_t *screen_buffer, int Y1, int Y2, int priority)
 				if (h > Y2 - y - yy)
 					h = Y2 - y - yy;
 
+				// int first_line = y + yy;
+				// int last_line = first_line + h;
+				// if (first_line < Y1)
+				// 	printf("first_line %d < Y1 %d\n", first_line, Y1);
+				// if (last_line > Y2)
+				// 	printf("last_line %d > Y2 %d\n", last_line, Y2);
+
 				if (attr & H_FLIP) {
 					for (int j = 0; j <= cgx; j++) {
 						draw_sprite(P + (cgx - j) * 16, C + j * 64, h, attr);
@@ -363,8 +394,11 @@ render_lines(int min_line, int max_line)
 		return;
 	}
 
-	// We must fill the region with color 0 first
-	// memset(screen_buffer + (min_line * XBUF_WIDTH), PCE.Palette[0], XBUF_WIDTH * (max_line - min_line + 1));
+	// Assume 16 lines of scratch area around our buffer.
+	framebuffer_top = screen_buffer - 16 * XBUF_WIDTH;
+	framebuffer_bottom = screen_buffer + (PCE.VDC.screen_height + 16) * XBUF_WIDTH;
+
+	// We must fill the region with color 0 first.
 	size_t screen_width = IO_VDC_SCREEN_WIDTH;
 	for (int y = min_line; y <= max_line; y++) {
 		memset(screen_buffer + (y * XBUF_WIDTH), PCE.Palette[0], screen_width);
